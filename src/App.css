@@ -1,0 +1,28 @@
+/* a {
+    color: inherit !important;
+    text-decoration: none !important;
+} */
+
+.scroll_y {
+    overflow-y: scroll;
+}
+
+.scroll_x {
+    overflow-x: scroll;
+}
+
+.scroll_x::-webkit-scrollbar {
+    height: 5px;
+    background-color: transparent;
+}
+
+.scroll_y::-webkit-scrollbar {
+    width: 0px;
+    background-color: transparent;
+}
+
+.scroll_y::-webkit-scrollbar-thumb,
+.scroll_x::-webkit-scrollbar-thumb {
+    border-radius: 20px;
+    background-color: rgb(6, 95, 70);
+}
