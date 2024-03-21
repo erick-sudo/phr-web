@@ -9,7 +9,7 @@ import Doctors from "../Doctors";
 import Appointments from "../Appointments";
 
 function Dashboard() {
-  const [showSizeNav, setShowSideNav] = useState(true);
+  const [showSizeNav, setShowSideNav] = useState(false);
   const { userInfo } = useContext(AuthContext);
 
   return (

@@ -1,12 +1,12 @@
-// import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
-const jwtDecode = (token, config) => {
-  if (config && config.header) {
-    return { exp: 1710877906798 };
-  } else {
-    return { id: 1, name: "admin", roles: ["ROLE_ADMIN"] };
-  }
-};
+// const jwtDecode = (token, config) => {
+//   if (config && config.header) {
+//     return { exp: 1710877906798 };
+//   } else {
+//     return { id: 1, name: "admin", roles: ["ROLE_ADMIN"] };
+//   }
+// };
 
 export const generatePagination = (currentPage, totalPages) => {
   // If the total number of pages is 7 or less,

@@ -31,18 +31,20 @@ function Appointments() {
   }, []);
 
   return (
-    <div>
-      <div>
+    <div className="py-4 grow m-2">
+      <div className="">
         <h4 className="text-xl px-4 py-2">Appointments</h4>
 
-        <div className="grid gap-6 xl:grid-cols-2 container mx-auto">
-          <AppointmentForm fetchPages={fetchPages} />
-          <div className="flex-grow border-4 bg-gray-50 p-2 rounded-md">
-            <h4 className="text-xl py-2">Recent Appointments</h4>
+        <div className="flex flex-col">
+          <div className="border-4 bg-gray-50 px-4 pt-2 pb-8 rounded-md m-2">
+            <h4 className="text-xl py-2 font-semibold">Recent Appointments</h4>
             <AppointmentsTable
               fetchPages={fetchPages}
               appointments={appointments}
             />
+          </div>
+          <div className="m-2 max-w-[30rem]">
+            <AppointmentForm fetchPages={fetchPages} />
           </div>
         </div>
       </div>
@@ -135,7 +137,7 @@ const AppointmentForm = ({ fetchPages }) => {
   };
 
   return (
-    <div className="max-w-xl min-w-96 p-6 bg-gray-50 rounded-md border-4 xl:self-end">
+    <div className="p-6 bg-gray-50 rounded-md border-4">
       <h2 className="text-lg font-semibold mb-4">Create Appointment</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
@@ -152,7 +154,7 @@ const AppointmentForm = ({ fetchPages }) => {
             value={patient?.name || ""}
             required
             placeholder="Select patient..."
-            className="w-full outline-none bg-transparent p-2 mt-2"
+            className="border-l-4 border-emerald-700 bg-emerald-700/10 rounded w-full outline-none p-2 mt-2"
           />
         </div>
         <div className="mb-4">
@@ -169,7 +171,7 @@ const AppointmentForm = ({ fetchPages }) => {
             value={doctor?.name || ""}
             required
             placeholder="Select doctor..."
-            className="w-full outline-none bg-transparent p-2 mt-2"
+            className="border-l-4 border-emerald-700 bg-emerald-700/10 rounded w-full outline-none p-2 mt-2"
           />
         </div>
         <div className="mb-4">
@@ -182,7 +184,7 @@ const AppointmentForm = ({ fetchPages }) => {
           <input
             type="datetime-local"
             id="dateTime"
-            className="mt-1 p-2 h-12 w-full rounded-md focus:outline-none focus:border-emerald-500"
+            className="border-l-4 border-emerald-700 bg-emerald-700/10 rounded mt-1 p-2 h-12 w-full rounded-md focus:outline-none focus:border-emerald-500"
             value={dateTime}
             onChange={(e) => setDateTime(e.target.value)}
             required
@@ -199,18 +201,20 @@ const AppointmentForm = ({ fetchPages }) => {
             rows={6}
             placeholder="Subject"
             id="reason"
-            className="mt-1 p-4 w-full rounded-md focus:outline-none focus:border-emerald-500"
+            className="border-l-4 border-emerald-700 bg-emerald-700/10 rounded mt-1 p-4 w-full rounded-md focus:outline-none focus:border-emerald-500"
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             required
           ></textarea>
         </div>
-        <button
-          type="submit"
-          className="bg-emerald-500 text-white px-4 py-2 rounded-md hover:bg-emerald-600"
-        >
-          Create Appointment
-        </button>
+        <div className="flex justify-end">
+          <button
+            type="submit"
+            className="bg-emerald-500 text-white px-4 py-2 rounded-md hover:bg-emerald-600"
+          >
+            Create Appointment
+          </button>
+        </div>
       </form>
     </div>
   );

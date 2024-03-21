@@ -11,8 +11,9 @@ import {
   RectangleStackIcon,
   UserCircleIcon,
 } from "@heroicons/react/24/outline";
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAccordionButton } from "react-bootstrap/AccordionButton";
+import clsx from "clsx";
 
 export function CustomToggle({ className, children, eventKey, host }) {
   const [on, setOn] = useState(false);
@@ -78,6 +79,7 @@ export function CustomAccordion({
 function SideNavigationBar() {
   const navigate = useNavigate();
   const { logout } = useContext(AuthContext);
+  const { pathname } = useLocation();
 
   return (
     <div>
@@ -85,7 +87,9 @@ function SideNavigationBar() {
         <div className="border-b border-emerald-600/50 py-2">
           <HoverFade
             onClick={() => navigate("/")}
-            className="px-4 py-2 flex items-center gap-3 rounded-md"
+            className={clsx(`px-4 py-2 flex items-center gap-3 rounded-md`, {
+              "text-emerald-800": pathname === "/",
+            })}
           >
             <RectangleStackIcon height={14} />
             <span>Dashboard</span>
@@ -126,7 +130,9 @@ function SideNavigationBar() {
         <div className="grid gap-2 border-b border-emerald-600/50 py-4">
           <HoverFade
             onClick={() => navigate("/patients")}
-            className="flex items-center rounded-md py-2 px-4 gap-3"
+            className={clsx(`px-4 py-2 flex items-center gap-3 rounded-md`, {
+              "text-emerald-800": pathname === "/patients",
+            })}
           >
             <RxAccessibility />
             <span className="">Patients</span>
@@ -134,7 +140,9 @@ function SideNavigationBar() {
 
           <HoverFade
             onClick={() => navigate("/doctors")}
-            className="flex items-center rounded-md py-2 px-4 gap-3"
+            className={clsx(`px-4 py-2 flex items-center gap-3 rounded-md`, {
+              "text-emerald-800": pathname === "/doctors",
+            })}
           >
             <CiStethoscope />
             <span className="">Doctors</span>
@@ -142,7 +150,9 @@ function SideNavigationBar() {
 
           <HoverFade
             onClick={() => navigate("/appointments")}
-            className="flex items-center rounded-md py-2 px-4 gap-3"
+            className={clsx(`px-4 py-2 flex items-center gap-3 rounded-md`, {
+              "text-emerald-800": pathname === "/appointments",
+            })}
           >
             <IoIosTimer />
             <span className="">Appointments</span>

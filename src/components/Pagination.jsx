@@ -59,7 +59,7 @@ function PaginationNumber({ page, onClick, isActive, position }) {
     {
       "rounded-l-md": position === "first" || position === "single",
       "rounded-r-md": position === "last" || position === "single",
-      "z-10 bg-lime-600 border-lime-600 text-white": isActive,
+      "z-10 bg-emerald-600 border-emerald-600 text-white": isActive,
       "hover:bg-gray-100": !isActive && position !== "middle",
       "text-gray-300": position === "middle",
     }
