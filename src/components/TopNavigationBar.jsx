@@ -1,12 +1,17 @@
-import React from "react";
+import React, { useContext } from "react";
 import { images } from "../assets/images/images";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars, faSearch } from "@fortawesome/free-solid-svg-icons";
 import Search from "./Search";
 import { BellIcon, Cog6ToothIcon } from "@heroicons/react/24/outline";
 import ThemeSurface from "./ThemeSurface";
+import { AuthContext } from "./context/AuthContext";
 
 function TopNavigationBar({ setShowSideNav }) {
+  const { userInfo } = useContext(AuthContext);
+
+  console.log(userInfo)
+
   return (
     <div className="flex items-center gap-4 px-4 py-2">
       <div className="flex items-center gap-2 min-w-[12rem]">

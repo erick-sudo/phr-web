@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router";
-import { apiCalls } from "../assets/apiCalls";
 import { apis } from "../lib/apis";
 import { notifiers } from "../assets/notifiers";
 import { formatDate, snakeCaseToTitleCase } from "../assets/utils";
@@ -14,42 +13,31 @@ import { FormModal } from "./modals/FormModal";
 import { ModalLink } from "./modals/ModalLink";
 import { LazySearch } from "./Search";
 import EditModal from "./modals/EditModal";
+import { axiosGet } from "../lib/axiosLib";
 
 function PatientDetails() {
   const { id } = useParams();
   const [patient, setPatient] = useState(null);
   const [medicalRecords, setPatientRecords] = useState([]);
 
-  const fetchPatient = () => {
-    apiCalls.getRequest({
-      endpoint: apis.patients.getPatientById.replace("<:id>", id),
-      httpMethod: "GET",
-      httpHeaders: {
-        Accept: "application/json",
-      },
-      successCallback: (res) => {
-        setPatient(res);
-      },
-      errorCallback: (err) => {
-        notifiers.httpError(err);
-      },
-    });
+  const fetchPatient = async () => {
+    await axiosGet(apis.patients.getPatientById.replace("<:id>", id))
+      .then((res) => {
+        setPatient(res.data);
+      })
+      .catch((axiosError) => {
+        notifiers.httpError(axiosError);
+      });
   };
 
   const fetchMedicalRecords = () => {
-    apiCalls.getRequest({
-      endpoint: apis.patients.medicalRecords.replace("<:id>", id),
-      httpMethod: "GET",
-      httpHeaders: {
-        Accept: "application/json",
-      },
-      successCallback: (res) => {
-        setPatientRecords(res);
-      },
-      errorCallback: (err) => {
-        notifiers.httpError(err);
-      },
-    });
+    axiosGet(apis.patients.medicalRecords.replace("<:id>", id))
+      .then((res) => {
+        setPatientRecords(res.data);
+      })
+      .catch((axiosError) => {
+        notifiers.httpError(axiosError);
+      });
   };
 
   useEffect(() => {

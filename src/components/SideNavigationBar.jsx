@@ -116,7 +116,7 @@ function SideNavigationBar() {
                 <span>Profile</span>
               </NavLink>
               <button
-                onClick={() => logout()}
+                onClick={logout}
                 className="flex items-center gap-2 py-2 hover:text-emerald-700 group"
                 to=""
               >

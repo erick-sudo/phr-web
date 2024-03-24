@@ -17,33 +17,24 @@ import Pagination from "./Pagination";
 import { apiCalls } from "../assets/apiCalls";
 import { notifiers } from "../assets/notifiers";
 import { Search2 } from "./Search";
+import { axiosGet, axiosPost } from "../lib/axiosLib";
 
 function Patients() {
   const [patients, setPatients] = useState({});
 
   const fetchPages = (page) => {
-    getRequest({
-      endpoint: `${apis.patients.getPatients}?page=${page}`,
-      errorCallback: () => {},
-      successCallback: (res) => {
-        setPatients(res);
-      },
+    axiosGet(`${apis.patients.getPatients}?page=${page}`).then((res) => {
+      setPatients(res.data);
     });
   };
 
   const searchPatients = (q) => {
-    apiCalls.postRequest({
-      endpoint: apis.patients.search,
-      httpMethod: "POST",
-      httpHeaders: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-      httpBody: {
-        query: q,
-        field_names: ["name", "email", "phone"],
-      },
-      successCallback: (res) => {
+    axiosPost(apis.patients.search, {
+      query: q,
+      field_names: ["name", "email", "phone"],
+    })
+      .then((resp) => {
+        const res = resp.data;
         const dt = {
           per_page: 10,
           total: res.length,
@@ -51,11 +42,8 @@ function Patients() {
           items: res,
         };
         setPatients(dt);
-      },
-      errorCallback: (res, body) => {
-        // TODO: handle
-      },
-    });
+      })
+      .catch((axiosError) => {});
   };
 
   const handleSearch = (query) => {

@@ -1,9 +1,8 @@
-import { useState, useEffect, useContext } from "react";
+import { useState, useContext } from "react";
 import { useLogin } from "../hooks/useLogin";
-import { useSession } from "../hooks/useSession";
 import { faHomeLgAlt } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { Navigate, useNavigate } from "react-router";
+import { useNavigate } from "react-router";
 import {
   EyeIcon,
   EyeSlashIcon,
@@ -17,18 +16,10 @@ export function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [handleLogin] = useLogin();
   const [formData, setFormData] = useState({
-    identity: "admin",
+    email: "admin@phr.com",
     password: "password",
   });
   const navigate = useNavigate();
-
-  const [handleSession] = useSession();
-
-  const { userInfo } = useContext(AuthContext);
-
-  useEffect(() => {
-    handleSession();
-  }, []);
 
   function handleChange(e) {
     setFormData({
@@ -44,13 +35,12 @@ export function Login() {
         ...formData,
         grant_type: "user",
       },
-      errorCallback: setLoginErrors,
+      errorCallback: (err) => {
+        setLoginErrors(err.errors);
+      },
     });
   }
 
-  if (userInfo) {
-    return <Navigate to="/" />
-  }
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-gray-100">
       <div className="rounded-lg relative bg-white backdrop-blur px-4 py-12">
@@ -68,22 +58,26 @@ export function Login() {
               <input
                 className="peer pl-6 pr-14 py-3 border w-full relative focus:outline-emerald-500 duration-300 rounded"
                 type="text"
-                id="identity"
+                id="email"
                 placeholder="Username or email"
-                value={formData.identity}
+                value={formData.email}
                 onChange={handleChange}
                 required
-                name="identity"
+                name="email"
               />
               <UserCircleIcon
                 height={20}
                 className="absolute z-10 right-4 text-gray-400 peer-focus:text-emerald-500"
               />
-              {loginErrors && loginErrors.status === 404 && (
-                <div className="text-red-700 rounded text-xs my-1 text-center">
-                  {loginErrors.error}
-                </div>
-              )}
+              {loginErrors?.email?.length > 0 &&
+                loginErrors.email.map((err, idx) => (
+                  <div
+                    key={idx}
+                    className="text-red-700 rounded text-xs my-1 text-center"
+                  >
+                    {err}
+                  </div>
+                ))}
             </div>
             <div className="relative flex flex-col items-center justify-center">
               <input
@@ -109,11 +103,15 @@ export function Login() {
                   className="absolute z-10 right-4 text-gray-400 peer-focus:text-emerald-500 hover:text-emerald-800 cursor-pointer duration-200"
                 />
               )}
-              {loginErrors && loginErrors.status === 401 && (
-                <div className="text-red-700 rounded text-xs my-1 text-center">
-                  {loginErrors.error}
-                </div>
-              )}
+              {loginErrors?.password?.length > 0 &&
+                loginErrors.password.map((err, idx) => (
+                  <div
+                    key={idx}
+                    className="text-red-700 rounded text-xs my-1 text-center"
+                  >
+                    {err}
+                  </div>
+                ))}
             </div>
             <div className="mt-4 grid font-bold rounded-md">
               <button
