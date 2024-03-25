@@ -104,7 +104,10 @@ function AppointmentsTable({ appointments, fetchPages }) {
   );
 }
 
-const AppointmentForm = ({ fetchPages }) => {
+export const AppointmentForm = ({
+  title = "Create Appointment",
+  fetchPages = () => {},
+}) => {
   const [patient, setPatient] = useState(null);
   const [doctor, setDoctor] = useState(null);
   const [dateTime, setDateTime] = useState("");
@@ -128,7 +131,7 @@ const AppointmentForm = ({ fetchPages }) => {
       },
       successCallback: (res) => {
         fetchPages();
-        notifiers.httpSuccess("Appointment registered successfully");
+        notifiers.httpSuccess("Appointment created successfully");
       },
       errorCallback: (res) => {
         notifiers.httpError(res.message);
@@ -138,7 +141,7 @@ const AppointmentForm = ({ fetchPages }) => {
 
   return (
     <div className="p-6 bg-gray-50 rounded-md border-4">
-      <h2 className="text-lg font-semibold mb-4">Create Appointment</h2>
+      <h2 className="text-lg font-semibold mb-4">{title}</h2>
       <form onSubmit={handleSubmit}>
         <div className="mb-4">
           <LazySearch
@@ -212,7 +215,7 @@ const AppointmentForm = ({ fetchPages }) => {
             type="submit"
             className="bg-emerald-500 text-white px-4 py-2 rounded-md hover:bg-emerald-600"
           >
-            Create Appointment
+            {title}
           </button>
         </div>
       </form>

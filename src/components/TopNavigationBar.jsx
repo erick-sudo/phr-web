@@ -1,16 +1,35 @@
 import React, { useContext } from "react";
-import { images } from "../assets/images/images";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faBars, faSearch } from "@fortawesome/free-solid-svg-icons";
-import Search from "./Search";
-import { BellIcon, Cog6ToothIcon } from "@heroicons/react/24/outline";
+import { faBars } from "@fortawesome/free-solid-svg-icons";
+import { RxAccessibility } from "react-icons/rx";
+import { CiStethoscope } from "react-icons/ci";
 import ThemeSurface from "./ThemeSurface";
 import { AuthContext } from "./context/AuthContext";
+import {
+  DashboardOutlined,
+  LockClockOutlined,
+  LogoutOutlined,
+  PersonOffOutlined,
+} from "@mui/icons-material";
+import HoverFade from "./HoverFade";
+import { useNavigate } from "react-router";
 
 function TopNavigationBar({ setShowSideNav }) {
-  const { userInfo } = useContext(AuthContext);
+  const { userInfo, logout } = useContext(AuthContext);
+  const navigate = useNavigate();
 
-  console.log(userInfo)
+  const navItems = [
+    { path: "/dashboard", icon: <DashboardOutlined />, title: "Dashboard" },
+    { path: "/profile", icon: <PersonOffOutlined />, title: "Profile" },
+    { path: "/logout", icon: <LogoutOutlined />, title: "Logout" },
+    { path: "/patients", icon: <RxAccessibility />, title: "Patients" },
+    { path: "/doctors", icon: <CiStethoscope />, title: "Doctors" },
+    {
+      path: "/appointments",
+      icon: <LockClockOutlined />,
+      title: "Appointments",
+    },
+  ];
 
   return (
     <div className="flex items-center gap-4 px-4 py-2">
@@ -36,21 +55,45 @@ function TopNavigationBar({ setShowSideNav }) {
         </ThemeSurface>
       </div>
       {/* <Search className="bg-emerald-700/5" /> */}
-      <div className="flex grow items-center justify-end gap-4">
-        <ThemeSurface className="p-1 rounded-lg">
+      <div className="flex grow justify-end items-center gap-4">
+        {/* <ThemeSurface className="p-1 rounded-lg">
           <BellIcon height={30} />
-        </ThemeSurface>
-        <ThemeSurface className="flex border p-2 pr-4 rounded-full gap-3 items-center bg-emerald-700/10">
-          <div className="h-10 w-10 rounded-full overflow-hidden">
-            <img
-              className="w-full h-full object-cover"
-              src="https://cdn.pixabay.com/photo/2022/07/12/09/11/woman-7316856_640.jpg"
-            />
+        </ThemeSurface> */}
+        <div className="flex gap-6 items-center justify-end">
+          <div className="flex flex-col items-center group">
+            <div className="h-8 w-8 rounded-full overflow-hidden">
+              <img
+                className="w-full h-full object-cover"
+                src="https://cdn.pixabay.com/photo/2022/07/12/09/11/woman-7316856_640.jpg"
+              />
+            </div>
+            <h4 className="font-bold text-emerald-900">{userInfo?.name}</h4>
+            <div className="relative">
+              <div className="hidden group-hover:grid absolute w-64 right-0 grid-cols-2 gap-2 p-2 z-50 bg-gray-100 shadow-lg rounded">
+                {navItems.map((item, idx) => (
+                  <HoverFade
+                    onClick={() =>
+                      item.path === "/logout" ? logout() : navigate(item.path)
+                    }
+                    className="flex flex-col items-center bg-[#fff] shadow-md py-4"
+                    key={idx}
+                  >
+                    <div>{item.icon}</div>
+                    <div>{item.title}</div>
+                  </HoverFade>
+                ))}
+              </div>
+            </div>
           </div>
-          <div className="">
-            <Cog6ToothIcon height={30} className="" />
+          <div className="flex gap-6 px-6">
+            <h4 className="font-bold text-emerald-900 border-1 border-emerald-700 bg-emerald-700/10 px-4 py-1 rounded-full">
+              {userInfo?.email}
+            </h4>
+            <h4 className="font-bold text-emerald-900 border-1 border-emerald-700 bg-emerald-700/10 px-4 py-1 rounded-full">
+              {userInfo?.role}
+            </h4>
           </div>
-        </ThemeSurface>
+        </div>
       </div>
     </div>
   );

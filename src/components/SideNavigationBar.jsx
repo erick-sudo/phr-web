@@ -110,7 +110,7 @@ function SideNavigationBar() {
             <div>
               <NavLink
                 className="flex items-center gap-2 py-2 hover:text-emerald-700 group"
-                to=""
+                to="/profile"
               >
                 <span className="bg-black h-[2px] w-[5px] rounded-full group-hover:bg-emerald-700"></span>
                 <span>Profile</span>
@@ -118,7 +118,6 @@ function SideNavigationBar() {
               <button
                 onClick={logout}
                 className="flex items-center gap-2 py-2 hover:text-emerald-700 group"
-                to=""
               >
                 <span className="bg-black h-[2px] w-[5px] rounded-full group-hover:bg-emerald-700"></span>
                 <span>Logout</span>

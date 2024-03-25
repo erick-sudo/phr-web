@@ -4,6 +4,7 @@ export const apis = {
   logout: `${base_url}/logout`,
   login: `${base_url}/login`,
   currentUser: `${base_url}/api/user`,
+  profile: `${base_url}/api/profile`,
   patients: {
     getPatients: `${base_url}/patients`,
     getPatientById: `${base_url}/patients/<:id>`,

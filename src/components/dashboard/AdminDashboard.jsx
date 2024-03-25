@@ -11,6 +11,7 @@ import { useNavigate } from "react-router";
 function AdminDashboard() {
   const [doctorsTally, setDoctorsTally] = useState(null);
   const [cardData, setCardData] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     axiosGet(apis.doctors.tally)
@@ -40,14 +41,14 @@ function AdminDashboard() {
       <div className="grid gap-6 p-6 md:grid-cols-2 lg:grid-cols-4">
         {cardData &&
           Object.keys(cardData).map((key, idx) => (
-            <div className="p-6 bg-white rounded-lg" key={idx}>
-              <h2 className="text-center text-xl text-gray-700">
+            <HoverFade className="p-6 bg-[#fff] rounded-lg hover:shadow hover:shadow-emerald-700" key={idx}>
+              <h2 onClick={() => navigate(key)} className="text-center text-xl text-gray-700">
                 {snakeCaseToTitleCase(key)}
               </h2>
               <div className="text-center font-extrabold text-2xl pt-2">
                 {cardData[key]}
               </div>
-            </div>
+            </HoverFade>
           ))}
       </div>
       <div className="grid gap-6 p-6 lg:grid-cols-2">
