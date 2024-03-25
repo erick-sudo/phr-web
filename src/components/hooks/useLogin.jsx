@@ -23,7 +23,7 @@ export function useLogin() {
           });
       })
       .catch((axiosError) => {
-        errorCallback(axiosError.response.data);
+        errorCallback(axiosError?.response?.data);
       });
     stopLoading();
   };

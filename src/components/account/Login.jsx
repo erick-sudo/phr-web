@@ -36,7 +36,7 @@ export function Login() {
         grant_type: "user",
       },
       errorCallback: (err) => {
-        setLoginErrors(err.errors);
+        setLoginErrors(err?.errors);
       },
     });
   }

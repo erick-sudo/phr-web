@@ -12,6 +12,7 @@ export const apis = {
     updatePatient: `${base_url}/patients/<:id>`,
     deletePatient: `${base_url}/patients/<:id>`,
     search: `${base_url}/patients/search`,
+    appointments: `${base_url}/patients/<:id>/appointments`,
     medicalRecords: `${base_url}/patients/<:id>/medical_records`,
   },
   doctors: {
@@ -35,6 +36,7 @@ export const apis = {
     createMedicalRecord: `${base_url}/medicalrecords`,
     updateMedicalRecord: `${base_url}/medicalrecords/<:id>`,
     deleteMedicalRecord: `${base_url}/medicalrecords/<:id>`,
+    labtests: `${base_url}/medicalrecords/<:id>/labtests`,
   },
   dashboard: {
     count: `${base_url}/dashboard/count`,

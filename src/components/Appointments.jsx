@@ -6,6 +6,8 @@ import { notifiers } from "../assets/notifiers";
 import { formatDate } from "../assets/utils";
 import { DeleteModal } from "./modals/DeleteModal";
 import { TrashIcon } from "@heroicons/react/24/outline";
+import { AppointmentStatus } from "./AppointmentStatus";
+import { axiosPatch } from "../lib/axiosLib";
 
 function Appointments() {
   const [appointments, setAppointments] = useState([]);
@@ -38,10 +40,12 @@ function Appointments() {
         <div className="flex flex-col">
           <div className="border-4 bg-gray-50 px-4 pt-2 pb-8 rounded-md m-2">
             <h4 className="text-xl py-2 font-semibold">Recent Appointments</h4>
-            <AppointmentsTable
-              fetchPages={fetchPages}
-              appointments={appointments}
-            />
+            <div className="scroll_x">
+              <AppointmentsTable
+                fetchPages={fetchPages}
+                appointments={appointments}
+              />
+            </div>
           </div>
           <div className="m-2 max-w-[30rem]">
             <AppointmentForm fetchPages={fetchPages} />
@@ -61,6 +65,7 @@ function AppointmentsTable({ appointments, fetchPages }) {
           <th className="px-2 py-1">Doctor</th>
           <th className="px-2 py-1">Date</th>
           <th className="px-2 py-1">Subject</th>
+          <th className="px-2 py-1">Status</th>
         </tr>
       </thead>
       <tbody>
@@ -77,8 +82,13 @@ function AppointmentsTable({ appointments, fetchPages }) {
               <td className="px-2 py-2 bg-white">
                 {formatDate(appointment.appointment_date)}
               </td>
-              <td className="px-2 py-2 bg-white">{appointment.reason}</td>
-              <td className="px-6 ">
+              <td className="px-2 py-2 bg-white whitespace-nowrap">
+                {appointment.reason?.slice(0, 25)}...
+              </td>
+              <td className="px-4">
+                <AppointmentStatus status={appointment.status} />
+              </td>
+              <td className="px-4 py-2 flex items-center gap-4">
                 <DeleteModal
                   receiveResponse={() => {
                     fetchPages();
@@ -96,6 +106,54 @@ function AppointmentsTable({ appointments, fetchPages }) {
                   }
                   icon={<TrashIcon height={14} />}
                 />
+                {appointment.status === "Pending" && (
+                  <button
+                    onClick={() => {
+                      axiosPatch(
+                        apis.appointments.updateAppointment.replace(
+                          "<:id>",
+                          appointment.id
+                        ),
+                        {
+                          status: "Approved",
+                        }
+                      )
+                        .then((res) => {
+                          fetchPages();
+                        })
+                        .catch((axiosError) => {
+                          console.log(axiosError);
+                        });
+                    }}
+                    className="bg-emerald-700 text-white px-4 py-1 hover:bg-emerald-500 duration-300 rounded"
+                  >
+                    Approve
+                  </button>
+                )}
+                {appointment.status === "Approved" && (
+                  <button
+                    onClick={() => {
+                      axiosPatch(
+                        apis.appointments.updateAppointment.replace(
+                          "<:id>",
+                          appointment.id
+                        ),
+                        {
+                          status: "Closed",
+                        }
+                      )
+                        .then((res) => {
+                          fetchPages();
+                        })
+                        .catch((axiosError) => {
+                          console.log(axiosError);
+                        });
+                    }}
+                    className="bg-red-700 text-white px-4 py-1 hover:bg-red-500 duration-300 rounded"
+                  >
+                    Cancel
+                  </button>
+                )}
               </td>
             </tr>
           ))}
@@ -107,8 +165,9 @@ function AppointmentsTable({ appointments, fetchPages }) {
 export const AppointmentForm = ({
   title = "Create Appointment",
   fetchPages = () => {},
+  initialPatient,
 }) => {
-  const [patient, setPatient] = useState(null);
+  const [patient, setPatient] = useState({});
   const [doctor, setDoctor] = useState(null);
   const [dateTime, setDateTime] = useState("");
   const [reason, setReason] = useState("");
