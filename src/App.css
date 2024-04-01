@@ -4,25 +4,30 @@
 } */
 
 .scroll_y {
-    overflow-y: scroll;
+  overflow-y: scroll;
 }
 
 .scroll_x {
-    overflow-x: scroll;
+  overflow-x: scroll;
 }
 
 .scroll_x::-webkit-scrollbar {
-    height: 5px;
-    background-color: transparent;
+  height: 5px;
+  background-color: transparent;
 }
 
 .scroll_y::-webkit-scrollbar {
-    width: 0px;
-    background-color: transparent;
+  width: 0px;
+  background-color: transparent;
 }
 
 .scroll_y::-webkit-scrollbar-thumb,
 .scroll_x::-webkit-scrollbar-thumb {
-    border-radius: 20px;
-    background-color: rgb(6, 95, 70);
+  border-radius: 20px;
+  background-color: rgb(6, 95, 70);
+}
+
+fieldset,
+legend {
+  float: none !important;
 }

@@ -31,7 +31,10 @@ function Profile() {
 
   return (
     <div>
-      <div></div>
+      <div>
+        <h5>Full Name</h5>
+        <div>{userInfo.name}</div>
+      </div>
     </div>
   );
 }

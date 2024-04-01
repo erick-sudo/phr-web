@@ -7,10 +7,11 @@ import Patients from "../Patients";
 import PatientDetails from "../PatientDetails";
 import Doctors from "../Doctors";
 import Appointments from "../Appointments";
-import { Login } from "../account/Login";
 import AdminDashboard from "./AdminDashboard";
 import Profile from "../account/Profile";
 import PatientProfile from "../PatientProfile";
+import Error404 from "../Error404";
+import SignIn from "../account/Signin";
 
 function Dashboard() {
   const [showSizeNav, setShowSideNav] = useState(true);
@@ -39,6 +40,7 @@ function Dashboard() {
                     <Route path="patients/:id" element={<PatientDetails />} />
                     <Route path="doctors" element={<Doctors />} />
                     <Route path="appointments" element={<Appointments />} />
+                    <Route path="*" element={<Error404 />} />
                   </Routes>
                 </div>
               </div>
@@ -50,7 +52,7 @@ function Dashboard() {
           </>
         )
       ) : (
-        <Login />
+        <SignIn />
       )}
     </>
   );
