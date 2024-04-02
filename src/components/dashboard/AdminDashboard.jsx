@@ -16,16 +16,14 @@ function AdminDashboard() {
   useEffect(() => {
     axiosGet(apis.doctors.tally)
       .then((res) => {
-        setDoctorsTally(
-          Object.keys(res.data).map((key) => ({
-            specialization: key,
-            count: res.data[key],
-          }))
-        );
+        // setDoctorsTally(
+        //   Object.keys(res.data).map((key) => ({
+        //     specialization: key,
+        //     count: res.data[key],
+        //   }))
+        // );
       })
       .catch((axiosError) => {});
-
-    axiosGet(apis);
 
     axiosGet(apis.dashboard.count)
       .then((res) => {
@@ -41,8 +39,14 @@ function AdminDashboard() {
       <div className="grid gap-6 p-6 md:grid-cols-2 lg:grid-cols-4">
         {cardData &&
           Object.keys(cardData).map((key, idx) => (
-            <HoverFade className="p-6 bg-[#fff] rounded-lg hover:shadow hover:shadow-emerald-700" key={idx}>
-              <h2 onClick={() => navigate(key)} className="text-center text-xl text-gray-700">
+            <HoverFade
+              className="p-6 bg-[#fff] rounded-lg hover:shadow hover:shadow-emerald-700"
+              key={idx}
+            >
+              <h2
+                onClick={() => navigate(key)}
+                className="text-center text-xl text-gray-700"
+              >
                 {snakeCaseToTitleCase(key)}
               </h2>
               <div className="text-center font-extrabold text-2xl pt-2">

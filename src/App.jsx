@@ -1,7 +1,7 @@
 import { useContext, useEffect } from "react";
 import "./App.css";
 import "bootstrap/dist/css/bootstrap.min.css";
-import { Routes, Route, useLocation, useNavigate } from "react-router";
+import { Routes, Route, useNavigate } from "react-router";
 import Dashboard from "./components/dashboard/Dashboard";
 import { Expired } from "./components/Expired";
 import { Loader } from "./components/Loader";
@@ -10,16 +10,11 @@ import Signup from "./components/account/Signup";
 import Error404 from "./components/Error404";
 import ForgotPassword from "./components/account/ForgotPassword";
 import ActivateAccount from "./components/account/ActivateAccount";
+import FinishAccountSetup from "./components/dashboard/FinishAccountSetup";
 
 function App() {
-  const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { userInfo, setUserInfo, expiredLogin, logout, loading } =
-    useContext(AuthContext);
-
-  // useEffect(() => {
-
-  // }, [pathname]);
+  const { userInfo, expiredLogin, logout, loading } = useContext(AuthContext);
 
   return (
     <div className="fixed inset-0 flex flex-col text-sm">
@@ -35,7 +30,18 @@ function App() {
       {loading && <Loader className="bg-white/75 z-50 fixed" />}
       <>
         <Routes>
-          <Route path="/*" element={<Dashboard />} />
+          <Route
+            path="/*"
+            element={
+              userInfo?.role ? (
+                <Dashboard />
+              ) : (
+                <>
+                  <FinishAccountSetup />
+                </>
+              )
+            }
+          />
           <Route path="/signup" element={<Signup />} />
           <Route path="/forgotpassword" element={<ForgotPassword />} />
           <Route path="/activate_account" element={<ActivateAccount />} />

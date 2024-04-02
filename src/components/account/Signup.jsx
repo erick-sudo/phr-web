@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import {
   Avatar,
   Button,
@@ -45,9 +45,15 @@ import {
   MailOutlineOutlined,
   ChevronRightOutlined,
   ChevronLeftOutlined,
+  PhoneEnabledOutlined,
+  Person4Outlined,
+  EmergencyShareOutlined,
 } from "@mui/icons-material";
 import clsx from "clsx";
 import styled from "@emotion/styled";
+import { axiosPost } from "../../lib/axiosLib";
+import { apis } from "../../lib/apis";
+import { AuthContext } from "../context/AuthContext";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -112,9 +118,9 @@ const styles = {
 
 export function SignupStepIconComponent({ active, completed, icon }) {
   const icons = {
-    1: <AccountCircleOutlined />,
+    1: <SafetyDividerOutlined />,
     2: <FolderSharedOutlined />,
-    3: <SafetyDividerOutlined />,
+    3: <EmergencyShareOutlined />,
     4: <SubdirectoryArrowLeftOutlined />,
   };
 
@@ -156,36 +162,313 @@ const SignupStepConnector = styled(StepConnector)(({ theme }) => ({
   },
 }));
 
-export default function SignUp() {
-  const [activeStep, setActiveStep] = useState(0);
+export function ValidationErrors({ errorsKey, errors }) {
+  return (
+    <>
+      {typeof errors === "object" &&
+        Array.isArray(errors[errorsKey]) &&
+        errors[errorsKey].length > 0 &&
+        errors[errorsKey].map((error, index) => (
+          <div key={index} className="text-red-700 text-xs px-2 mt-1">
+            {error}
+          </div>
+        ))}
+    </>
+  );
+}
+
+export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
-  const [accountClass, setAccountClass] = useState("personal");
-  const [emergencyContacts, setEmergencyContacts] = useState([
-    {
-      name: "",
-      relationship: "",
-      phone: "",
-      email: "",
-    },
-  ]);
+  const [registrationData, setRegistrationData] = useState({});
 
-  const handleNext = () =>
-    setActiveStep((prevActiveStep) => prevActiveStep + 1);
+  const [validationErrors, setValidationErrors] = useState({});
+  const { snackNotifier, startLoading, stopLoading } = useContext(AuthContext);
 
-  const handleBack = () =>
-    setActiveStep((prevActiveStep) => prevActiveStep - 1);
-
-  const handleReset = () => setActiveStep(0);
+  const handleRegistrationDataChange = (e) => {
+    setRegistrationData({
+      ...registrationData,
+      [e.target.name]: e.target.value,
+    });
+  };
 
   const handleAccountCreation = (e) => {
     e.preventDefault();
+    startLoading();
+    axiosPost(apis.register, {
+      ...registrationData,
+    })
+      .then((res) => {
+        stopLoading();
+        snackNotifier(
+          "Registered successfully. We have sent an email with instructions to activate your account.",
+          "success",
+          "top-center"
+        );
+        setRegistrationData({});
+      })
+      .catch((axiosError) => {
+        stopLoading();
+        if (axiosError?.response?.data?.errors) {
+          const errors = axiosError.response.data.errors;
+          setValidationErrors(
+            Object.keys(errors).reduce((acc, curr) => {
+              acc[`phase0#${curr}`] = errors[curr];
+              return acc;
+            }, {})
+          );
+        }
+      });
+  };
+  return (
+    <div className="fixed inset-0 flex items-center justify-center">
+      <div className="max-w-md px-4">
+        <CssBaseline />
+        <div className="grid gap-4 items-center py-8">
+          <Avatar sx={styles.avatar}>
+            <LockClosedIcon height={30} />
+          </Avatar>
+          <Typography className="text-center" component="h1" variant="h5">
+            Open account
+          </Typography>
+          <form onSubmit={handleAccountCreation} className="grid gap-4">
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  sx={styles.textField}
+                  autoComplete="name"
+                  name="name"
+                  variant="outlined"
+                  required
+                  fullWidth
+                  error={Boolean(validationErrors["phase0#name"])}
+                  id="name"
+                  label="Full Name"
+                  autoFocus
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton aria-label="phone number" edge="end">
+                          <Person4Outlined />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                  value={registrationData.name || ""}
+                  onChange={handleRegistrationDataChange}
+                />
+                <ValidationErrors
+                  errorsKey="phase0#name"
+                  errors={validationErrors}
+                />
+              </Grid>
 
-    setActiveStep(1);
+              <Grid item xs={12}>
+                <TextField
+                  sx={styles.textField}
+                  variant="outlined"
+                  required
+                  fullWidth
+                  error={Boolean(validationErrors["phase0#email"])}
+                  id="email"
+                  label="Email Address"
+                  name="email"
+                  autoComplete="email"
+                  value={registrationData.email || ""}
+                  onChange={handleRegistrationDataChange}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton aria-label="email icon" edge="end">
+                          <MailOutlineOutlined />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <ValidationErrors
+                  errorsKey="phase0#email"
+                  errors={validationErrors}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  sx={styles.textField}
+                  variant="outlined"
+                  required
+                  fullWidth
+                  error={Boolean(validationErrors["phase0#phone_number"])}
+                  id="phone_number"
+                  label="Phone Number e.g. 254XXXXXXXXX"
+                  name="phone_number"
+                  autoComplete="phone_number"
+                  value={registrationData.phone_number || ""}
+                  onChange={handleRegistrationDataChange}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton aria-label="phone number" edge="end">
+                          <PhoneEnabledOutlined />
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <ValidationErrors
+                  errorsKey="phase0#phone_number"
+                  errors={validationErrors}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  sx={styles.textField}
+                  variant="outlined"
+                  required
+                  fullWidth
+                  error={Boolean(validationErrors["phase0#password"])}
+                  name="password"
+                  label="Password"
+                  id="password"
+                  autoComplete="current-password"
+                  value={registrationData.password || ""}
+                  onChange={handleRegistrationDataChange}
+                  type={showPassword ? "text" : "password"}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={() => setShowPassword(!showPassword)}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  variant="outlined"
+                  sx={styles.textField}
+                  required
+                  fullWidth
+                  error={Boolean(validationErrors["phase0#password"])}
+                  name="password_confirmation"
+                  label="Confirm Password"
+                  type={showPassword ? "text" : "password"}
+                  id="password_confirmation"
+                  autoComplete="current-password"
+                  value={registrationData.password_confirmation || ""}
+                  onChange={handleRegistrationDataChange}
+                  InputProps={{
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton
+                          aria-label="toggle password visibility"
+                          onClick={() => setShowPassword(!showPassword)}
+                          edge="end"
+                        >
+                          {showPassword ? <VisibilityOff /> : <Visibility />}
+                        </IconButton>
+                      </InputAdornment>
+                    ),
+                  }}
+                />
+                <ValidationErrors
+                  errorsKey="phase0#password"
+                  errors={validationErrors}
+                />
+              </Grid>
+            </Grid>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              sx={styles.submit}
+            >
+              Sign Up
+            </Button>
+            <Grid container>
+              <NavLink
+                className="hover:text-emerald-800 text-emerald-600 text-center mt-4 mx-auto"
+                to="/"
+                variant="body2"
+              >
+                Already have an account? Sign in
+              </NavLink>
+            </Grid>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export function AccountClass({ receiveData, setActiveStep, step }) {
+  const [accountClass, setAccountClass] = useState("personal");
+  const [practitionerData, setPractitonerData] = useState({});
+
+  return (
+    <div className="px-6">
+      <div>
+        <RadioGroup
+          onChange={(e) => {
+            setAccountClass(e.target.value);
+          }}
+          name="account_class"
+          value={accountClass}
+          row
+        >
+          <FormControlLabel
+            value="personal"
+            control={<Radio sx={{ ...styles.customCheckbox }} />}
+            label="Personal Account"
+          />
+          <FormControlLabel
+            value="practitioner"
+            control={<Radio sx={{ ...styles.customCheckbox }} />}
+            label="Medical Practitioner"
+          />
+        </RadioGroup>
+      </div>
+
+      <form>
+        {accountClass === "practitioner" && <DoctorRegistrationForm />}
+
+        <div className="py-4 flex justify-end">
+          <Button
+            onClick={() => {
+              receiveData(practitionerData);
+              setActiveStep(step + 1);
+            }}
+            endIcon={<ChevronRightOutlined height={24} />}
+            type="button"
+            variant="contained"
+            color="primary"
+            sx={{ ...styles.submit }}
+          >
+            Next
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+export function AccountSetup() {
+  const [activeStep, setActiveStep] = useState(0);
+  const handleReset = () => setActiveStep(0);
+  const [formData, setFormData] = useState({});
+
+  const receiveData = (k, v) => {
+    setFormData({ ...formData, [k]: v });
   };
 
   return (
-    <div className="scroll_y">
-      <Container maxWidth="xl" className="py-8">
+    <div className="">
+      <Container className="py-8">
         <Stepper activeStep={activeStep} orientation="vertical">
           <Step>
             <StepLabel
@@ -196,152 +479,15 @@ export default function SignUp() {
               }}
               StepIconComponent={SignupStepIconComponent}
             >
-              Create Account
+              Classify Account
             </StepLabel>
             <StepContent>
-              <Container component="main" maxWidth="xs">
-                <CssBaseline />
-                <div className="grid gap-4 items-center py-8">
-                  <Avatar sx={styles.avatar}>
-                    <LockClosedIcon height={30} />
-                  </Avatar>
-                  <Typography
-                    className="text-center"
-                    component="h1"
-                    variant="h5"
-                  >
-                    Open account
-                  </Typography>
-                  <form onSubmit={handleAccountCreation} className="grid gap-4">
-                    <Grid container spacing={2}>
-                      <Grid item xs={12}>
-                        <TextField
-                          sx={styles.textField}
-                          autoComplete="fname"
-                          name="firstName"
-                          variant="outlined"
-                          required
-                          fullWidth
-                          id="firstName"
-                          label="First Name"
-                          autoFocus
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          sx={styles.textField}
-                          variant="outlined"
-                          required
-                          fullWidth
-                          id="lastName"
-                          label="Last Name"
-                          name="lastName"
-                          autoComplete="lname"
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          sx={styles.textField}
-                          variant="outlined"
-                          required
-                          fullWidth
-                          id="email"
-                          label="Email Address"
-                          name="email"
-                          autoComplete="email"
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <IconButton aria-label="email icon" edge="end">
-                                  <MailOutlineOutlined />
-                                </IconButton>
-                              </InputAdornment>
-                            ),
-                          }}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          sx={styles.textField}
-                          variant="outlined"
-                          required
-                          fullWidth
-                          name="password"
-                          label="Password"
-                          id="password"
-                          autoComplete="current-password"
-                          type={showPassword ? "text" : "password"}
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <IconButton
-                                  aria-label="toggle password visibility"
-                                  onClick={() => setShowPassword(!showPassword)}
-                                  edge="end"
-                                >
-                                  {showPassword ? (
-                                    <VisibilityOff />
-                                  ) : (
-                                    <Visibility />
-                                  )}
-                                </IconButton>
-                              </InputAdornment>
-                            ),
-                          }}
-                        />
-                      </Grid>
-                      <Grid item xs={12}>
-                        <TextField
-                          variant="outlined"
-                          sx={styles.textField}
-                          required
-                          fullWidth
-                          name="confirm_password"
-                          label="Confirm Password"
-                          type={showPassword ? "text" : "password"}
-                          id="confirm_password"
-                          autoComplete="current-password"
-                          InputProps={{
-                            endAdornment: (
-                              <InputAdornment position="end">
-                                <IconButton
-                                  aria-label="toggle password visibility"
-                                  onClick={() => setShowPassword(!showPassword)}
-                                  edge="end"
-                                >
-                                  {showPassword ? (
-                                    <VisibilityOff />
-                                  ) : (
-                                    <Visibility />
-                                  )}
-                                </IconButton>
-                              </InputAdornment>
-                            ),
-                          }}
-                        />
-                      </Grid>
-                    </Grid>
-                    <Button
-                      type="button"
-                      onClick={() => setActiveStep(1)}
-                      fullWidth
-                      variant="contained"
-                      color="primary"
-                      sx={styles.submit}
-                    >
-                      Sign Up
-                    </Button>
-                    <Grid container>
-                      <NavLink
-                        className="hover:text-emerald-800 text-emerald-600 text-center mt-4 mx-auto"
-                        to="/"
-                        variant="body2"
-                      >
-                        Already have an account? Sign in
-                      </NavLink>
-                    </Grid>
-                  </form>
-                </div>
+              <Container className="p-4" component="main">
+                <AccountClass
+                  receiveData={receiveData}
+                  setActiveStep={setActiveStep}
+                  step={0}
+                />
               </Container>
             </StepContent>
           </Step>
@@ -369,255 +515,11 @@ export default function SignUp() {
                 >
                   <ArrowLongLeftIcon height={32} />
                 </IconButton>
-                <form className="grid gap-4 py-4 px-2">
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} md={6} lg={4}>
-                      <TextField
-                        autoComplete="fname"
-                        name="firstName"
-                        variant="standard"
-                        sx={styles.standardTextField}
-                        required
-                        fullWidth
-                        id="firstName"
-                        label="First Name"
-                        autoFocus
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6} lg={4}>
-                      <TextField
-                        variant="standard"
-                        sx={styles.standardTextField}
-                        fullWidth
-                        id="middlename"
-                        label="Middle Name"
-                        name="middlename"
-                        autoComplete="mname"
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={12} lg={4}>
-                      <TextField
-                        variant="standard"
-                        sx={styles.standardTextField}
-                        required
-                        fullWidth
-                        id="lastName"
-                        label="Last Name"
-                        name="lastName"
-                        autoComplete="lname"
-                      />
-                    </Grid>
-                  </Grid>
-                  <TextField
-                    variant="standard"
-                    sx={styles.standardTextField}
-                    required
-                    fullWidth
-                    id="city"
-                    label="National Identity Number/ Passport"
-                    name="city"
-                    autoComplete="city"
-                  />
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} md={6}>
-                      <DatePicker
-                        className="w-full"
-                        fullWidth
-                        required
-                        label="Date of Birth"
-                        sx={styles.textField}
-                        disablePast
-                        views={["year", "month", "day"]}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <FormControl required fullWidth sx={styles.textField}>
-                        <InputLabel id="demo-multiple-checkbox-label">
-                          Gender
-                        </InputLabel>
-                        <Select
-                          value=""
-                          input={<OutlinedInput label="Gender" />}
-                          MenuProps={MenuProps}
-                        >
-                          <MenuItem disabled value="">
-                            <ListItemText primary={"Select"} />
-                          </MenuItem>
-                          <MenuItem value="Male">
-                            <ListItemText primary={"Male"} />
-                          </MenuItem>
-                          <MenuItem value="Female">
-                            <ListItemText primary={"Female"} />
-                          </MenuItem>
-                        </Select>
-                      </FormControl>
-                    </Grid>
-                  </Grid>
-                  <Stack className="">
-                    <Typography>Emergency Contacts</Typography>
-                    <div>
-                      {emergencyContacts.map((contact, index) => (
-                        <div>
-                          <EmergencyContactForm contact={contact} key={index} />
-                          <div>
-                            <IconButton />
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                    <Button
-                      onClick={() =>
-                        setEmergencyContacts((p) => [
-                          ...p,
-                          { name: "", email: "", phone: "", relationship: "" },
-                        ])
-                      }
-                      className="w-max px-4"
-                      startIcon={<PlusIcon height={24} />}
-                      type="button"
-                      variant="contained"
-                      color="primary"
-                      sx={{ ...styles.submit }}
-                    >
-                      Add
-                    </Button>
-                  </Stack>
-                  <Stack gap={2}>
-                    <Typography>Residence</Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} lg={6}>
-                        <TextField
-                          variant="standard"
-                          sx={styles.standardTextField}
-                          required
-                          fullWidth
-                          id="address"
-                          label="Address"
-                          name="address"
-                          autoComplete="address"
-                        />
-                      </Grid>
-                      <Grid item xs={12} lg={6}>
-                        <TextField
-                          variant="standard"
-                          sx={styles.standardTextField}
-                          required
-                          fullWidth
-                          id="city"
-                          label="City"
-                          name="city"
-                          autoComplete="city"
-                        />
-                      </Grid>
-                      <Grid item xs={12} lg={6}>
-                        <TextField
-                          variant="standard"
-                          sx={styles.standardTextField}
-                          required
-                          fullWidth
-                          id="state"
-                          label="State"
-                          name="state"
-                          autoComplete="state"
-                        />
-                      </Grid>
-                      <Grid item xs={12} lg={6}>
-                        <TextField
-                          variant="standard"
-                          sx={styles.standardTextField}
-                          required
-                          fullWidth
-                          id="postal_code"
-                          label="Postal Code"
-                          name="postal_code"
-                          autoComplete="postal_code"
-                        />
-                      </Grid>
-                    </Grid>
-                  </Stack>
-
-                  <Divider />
-
-                  <div className="py-4">
-                    <FormControl fullWidth sx={styles.textField}>
-                      <InputLabel id="marital_status">
-                        Marital Status
-                      </InputLabel>
-                      <Select
-                        value=""
-                        input={<OutlinedInput label="Marital Status" />}
-                        MenuProps={MenuProps}
-                      >
-                        <MenuItem disabled value="">
-                          <ListItemText primary={"Select"} />
-                        </MenuItem>
-                        <MenuItem value="Single">
-                          <ListItemText primary={"Single"} />
-                        </MenuItem>
-                        <MenuItem value="Married">
-                          <ListItemText primary={"Married"} />
-                        </MenuItem>
-                        <MenuItem value="Divorced">
-                          <ListItemText primary={"Divorced"} />
-                        </MenuItem>
-                        <MenuItem value="Widowed">
-                          <ListItemText primary={"Widowed"} />
-                        </MenuItem>
-                        <MenuItem value="Other">
-                          <ListItemText primary={"Other"} />
-                        </MenuItem>
-                      </Select>
-                    </FormControl>
-                  </div>
-
-                  <div className="py-4">
-                    <FormControl fullWidth sx={styles.textField}>
-                      <InputLabel id="language">
-                        Preferred language for communication and documentation
-                      </InputLabel>
-                      <Select
-                        value=""
-                        input={
-                          <OutlinedInput label="Preferred language for communication and documentation" />
-                        }
-                        MenuProps={MenuProps}
-                      >
-                        <MenuItem disabled value="">
-                          <ListItemText primary={"Select"} />
-                        </MenuItem>
-                        <MenuItem value="English">
-                          <ListItemText primary={"English"} />
-                        </MenuItem>
-                        <MenuItem value="Swahili">
-                          <ListItemText primary={"Swahili"} />
-                        </MenuItem>
-                      </Select>
-                    </FormControl>
-                  </div>
-
-                  <div className="flex justify-between">
-                    <Button
-                      startIcon={<ChevronLeftOutlined height={24} />}
-                      type="button"
-                      variant="contained"
-                      color="primary"
-                      sx={{ ...styles.submit }}
-                      onClick={() => setActiveStep(0)}
-                    >
-                      Previous
-                    </Button>
-                    <Button
-                      onClick={() => setActiveStep(2)}
-                      endIcon={<ChevronRightOutlined height={24} />}
-                      type="button"
-                      variant="contained"
-                      color="primary"
-                      sx={{ ...styles.submit }}
-                    >
-                      Next
-                    </Button>
-                  </div>
-                </form>
+                <PersonalInformation
+                  receiveData={receiveData}
+                  setActiveStep={setActiveStep}
+                  step={1}
+                />
               </Container>
             </StepContent>
           </Step>
@@ -630,10 +532,10 @@ export default function SignUp() {
               }}
               StepIconComponent={SignupStepIconComponent}
             >
-              Classify Account
+              Emergency Contact Information
             </StepLabel>
             <StepContent>
-              <Container className="p-4" component="main">
+              <Container component="main">
                 <IconButton
                   onClick={() => setActiveStep(1)}
                   sx={{
@@ -645,58 +547,11 @@ export default function SignUp() {
                 >
                   <ArrowLongLeftIcon height={32} />
                 </IconButton>
-                <div className="px-6">
-                  <div>
-                    <RadioGroup
-                      onChange={(e) => {
-                        setAccountClass(e.target.value);
-                      }}
-                      name="account_class"
-                      value={accountClass}
-                      row
-                    >
-                      <FormControlLabel
-                        value="personal"
-                        control={<Radio sx={{ ...styles.customCheckbox }} />}
-                        label="Personal Account"
-                      />
-                      <FormControlLabel
-                        value="practitioner"
-                        control={<Radio sx={{ ...styles.customCheckbox }} />}
-                        label="Medical Practitioner"
-                      />
-                    </RadioGroup>
-                  </div>
-
-                  <form>
-                    {accountClass === "practitioner" && (
-                      <DoctorRegistrationForm />
-                    )}
-
-                    <div className="py-4 flex justify-between">
-                      <Button
-                        startIcon={<ChevronLeftOutlined height={24} />}
-                        type="button"
-                        variant="contained"
-                        color="primary"
-                        sx={{ ...styles.submit }}
-                        onClick={() => setActiveStep(1)}
-                      >
-                        Previous
-                      </Button>
-                      <Button
-                        onClick={() => setActiveStep(3)}
-                        endIcon={<ChevronRightOutlined height={24} />}
-                        type="button"
-                        variant="contained"
-                        color="primary"
-                        sx={{ ...styles.submit }}
-                      >
-                        Next
-                      </Button>
-                    </div>
-                  </form>
-                </div>
+                <EmergencyContacts
+                  receiveData={receiveData}
+                  setActiveStep={setActiveStep}
+                  step={2}
+                />
               </Container>
             </StepContent>
           </Step>
@@ -750,6 +605,305 @@ export default function SignUp() {
           </Step>
         </Stepper>
       </Container>
+    </div>
+  );
+}
+
+export function PersonalInformation({ receiveData, setActiveStep, step }) {
+  const [personalInfo, setPersonalInfo] = useState({});
+
+  return (
+    <div>
+      <form className="grid gap-4 py-4 px-2">
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={6} lg={4}>
+            <TextField
+              autoComplete="fname"
+              name="firstName"
+              variant="standard"
+              sx={styles.standardTextField}
+              required
+              fullWidth
+              id="firstName"
+              label="First Name"
+              autoFocus
+            />
+          </Grid>
+          <Grid item xs={12} md={6} lg={4}>
+            <TextField
+              variant="standard"
+              sx={styles.standardTextField}
+              fullWidth
+              id="middlename"
+              label="Middle Name"
+              name="middlename"
+              autoComplete="mname"
+            />
+          </Grid>
+          <Grid item xs={12} md={12} lg={4}>
+            <TextField
+              variant="standard"
+              sx={styles.standardTextField}
+              required
+              fullWidth
+              id="lastName"
+              label="Last Name"
+              name="lastName"
+              autoComplete="lname"
+            />
+          </Grid>
+        </Grid>
+        <TextField
+          variant="standard"
+          sx={styles.standardTextField}
+          required
+          fullWidth
+          id="city"
+          label="National Identity Number/ Passport"
+          name="city"
+          autoComplete="city"
+        />
+        <Grid container spacing={2}>
+          <Grid item xs={12} md={6}>
+            <DatePicker
+              className="w-full"
+              fullWidth
+              required
+              label="Date of Birth"
+              sx={styles.textField}
+              disablePast
+              views={["year", "month", "day"]}
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <FormControl required fullWidth sx={styles.textField}>
+              <InputLabel id="demo-multiple-checkbox-label">Gender</InputLabel>
+              <Select
+                value=""
+                input={<OutlinedInput label="Gender" />}
+                MenuProps={MenuProps}
+              >
+                <MenuItem disabled value="">
+                  <ListItemText primary={"Select"} />
+                </MenuItem>
+                <MenuItem value="Male">
+                  <ListItemText primary={"Male"} />
+                </MenuItem>
+                <MenuItem value="Female">
+                  <ListItemText primary={"Female"} />
+                </MenuItem>
+              </Select>
+            </FormControl>
+          </Grid>
+        </Grid>
+        <Stack gap={2}>
+          <Typography>Residence</Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} lg={6}>
+              <TextField
+                variant="standard"
+                sx={styles.standardTextField}
+                required
+                fullWidth
+                id="address"
+                label="Address"
+                name="address"
+                autoComplete="address"
+              />
+            </Grid>
+            <Grid item xs={12} lg={6}>
+              <TextField
+                variant="standard"
+                sx={styles.standardTextField}
+                required
+                fullWidth
+                id="city"
+                label="City"
+                name="city"
+                autoComplete="city"
+              />
+            </Grid>
+            <Grid item xs={12} lg={6}>
+              <TextField
+                variant="standard"
+                sx={styles.standardTextField}
+                required
+                fullWidth
+                id="state"
+                label="State"
+                name="state"
+                autoComplete="state"
+              />
+            </Grid>
+            <Grid item xs={12} lg={6}>
+              <TextField
+                variant="standard"
+                sx={styles.standardTextField}
+                required
+                fullWidth
+                id="postal_code"
+                label="Postal Code"
+                name="postal_code"
+                autoComplete="postal_code"
+              />
+            </Grid>
+          </Grid>
+        </Stack>
+
+        <div className="py-4">
+          <FormControl fullWidth sx={styles.textField}>
+            <InputLabel id="marital_status">Marital Status</InputLabel>
+            <Select
+              value=""
+              input={<OutlinedInput label="Marital Status" />}
+              MenuProps={MenuProps}
+            >
+              <MenuItem disabled value="">
+                <ListItemText primary={"Select"} />
+              </MenuItem>
+              <MenuItem value="Single">
+                <ListItemText primary={"Single"} />
+              </MenuItem>
+              <MenuItem value="Married">
+                <ListItemText primary={"Married"} />
+              </MenuItem>
+              <MenuItem value="Divorced">
+                <ListItemText primary={"Divorced"} />
+              </MenuItem>
+              <MenuItem value="Widowed">
+                <ListItemText primary={"Widowed"} />
+              </MenuItem>
+              <MenuItem value="Other">
+                <ListItemText primary={"Other"} />
+              </MenuItem>
+            </Select>
+          </FormControl>
+        </div>
+
+        <div className="py-4">
+          <FormControl fullWidth sx={styles.textField}>
+            <InputLabel id="language">
+              Preferred language for communication and documentation
+            </InputLabel>
+            <Select
+              value=""
+              input={
+                <OutlinedInput label="Preferred language for communication and documentation" />
+              }
+              MenuProps={MenuProps}
+            >
+              <MenuItem disabled value="">
+                <ListItemText primary={"Select"} />
+              </MenuItem>
+              <MenuItem value="English">
+                <ListItemText primary={"English"} />
+              </MenuItem>
+              <MenuItem value="Swahili">
+                <ListItemText primary={"Swahili"} />
+              </MenuItem>
+            </Select>
+          </FormControl>
+        </div>
+
+        <div className="flex justify-between">
+          <Button
+            startIcon={<ChevronLeftOutlined height={24} />}
+            type="button"
+            variant="contained"
+            color="primary"
+            sx={{ ...styles.submit }}
+            onClick={() => setActiveStep(step - 1)}
+          >
+            Previous
+          </Button>
+          <Button
+            onClick={() => {
+              receiveData(personalInfo);
+              setActiveStep(step + 1);
+            }}
+            className="w-max px-4"
+            startIcon={<PlusIcon height={24} />}
+            type="button"
+            variant="contained"
+            color="primary"
+            sx={{ ...styles.submit }}
+          >
+            Save
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+function EmergencyContacts({ receiveData, setActiveStep, step }) {
+  const [emergencyContacts, setEmergencyContacts] = useState([
+    {
+      name: "",
+      relationship: "",
+      phone: "",
+      email: "",
+    },
+  ]);
+
+  return (
+    <div>
+      <Stack className="">
+        <Typography>Emergency Contacts</Typography>
+        <div>
+          {emergencyContacts.map((contact, index) => (
+            <div key={index}>
+              <EmergencyContactForm contact={contact} />
+              <div>
+                <IconButton />
+              </div>
+            </div>
+          ))}
+        </div>
+        <Button
+          onClick={() =>
+            setEmergencyContacts((p) => [
+              ...p,
+              { name: "", email: "", phone: "", relationship: "" },
+            ])
+          }
+          className="w-max px-4"
+          startIcon={<PlusIcon height={24} />}
+          type="button"
+          variant="contained"
+          color="primary"
+          sx={{ ...styles.submit }}
+        >
+          Add
+        </Button>
+        <Divider className="py-4" />
+        <div className="flex justify-between items-center">
+          <Button
+            startIcon={<ChevronLeftOutlined height={24} />}
+            type="button"
+            variant="contained"
+            color="primary"
+            sx={{ ...styles.submit }}
+            onClick={() => setActiveStep(step - 1)}
+          >
+            Previous
+          </Button>
+          <Button
+            onClick={() => {
+              receiveData(emergencyContacts);
+              setActiveStep(step + 1);
+            }}
+            className="w-max px-4"
+            startIcon={<PlusIcon height={24} />}
+            type="button"
+            variant="contained"
+            color="primary"
+            sx={{ ...styles.submit }}
+          >
+            Save
+          </Button>
+        </div>
+      </Stack>
     </div>
   );
 }

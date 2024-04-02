@@ -17,6 +17,8 @@ function Dashboard() {
   const [showSizeNav, setShowSideNav] = useState(true);
   const { userInfo } = useContext(AuthContext);
 
+  console.log(userInfo);
+
   return (
     <>
       {userInfo ? (

@@ -12,6 +12,7 @@ import {
   Container,
   InputAdornment,
   IconButton,
+  Alert,
 } from "@mui/material";
 
 import { useNavigate } from "react-router";
@@ -25,6 +26,7 @@ import {
   Visibility,
   VisibilityOff,
 } from "@mui/icons-material";
+import { ValidationErrors } from "./Signup";
 
 const images = [
   "https://cdn.pixabay.com/photo/2015/07/10/20/54/stethoscope-840125_640.jpg",
@@ -73,12 +75,12 @@ const styles = {
 };
 
 const SignIn = () => {
-  const [loginErrors, setLoginErrors] = useState({});
+  const [loginErrors, setLoginErrors] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
   const [handleLogin] = useLogin();
   const [formData, setFormData] = useState({
-    email: "admin@phr.com",
-    password: "password",
+    email: "",
+    password: "",
   });
   const navigate = useNavigate();
 
@@ -148,6 +150,31 @@ const SignIn = () => {
         elevation={6}
       >
         <Container maxWidth="xs" className={`px-4`}>
+          {loginErrors && (
+            <div className="py-4 gap-2 grid">
+              <Alert severity="info">
+                <div>
+                  Please ensure you verify your email address before any login
+                  attempt
+                </div>
+                <div className="flex justify-end">
+                  <Button
+                    onClick={() => navigate("/activate_account")}
+                    sx={{ borderRadius: "20px" }}
+                    size="small"
+                    variant="outlined"
+                  >
+                    Verify Account
+                  </Button>
+                </div>
+              </Alert>
+              {loginErrors?.email && (
+                <Alert severity="error">
+                  <ValidationErrors errors={loginErrors} errorsKey="email" />
+                </Alert>
+              )}
+            </div>
+          )}
           <Avatar sx={styles.avatar}>
             <LockClosedIcon height={30} />
           </Avatar>

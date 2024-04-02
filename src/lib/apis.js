@@ -1,8 +1,14 @@
 const base_url = "http://localhost:8000";
 
 export const apis = {
-  logout: `${base_url}/logout`,
+  register: `${base_url}/register`,
   login: `${base_url}/login`,
+  verifyEmail: `${base_url}/verify-email`,
+  verificationNotification: `${base_url}/email/verification-notification`,
+  verificationNotificationResend: `${base_url}/resend/verification-notification`,
+  resetPassword: `${base_url}/reset-password`,
+  forgotPassword: `${base_url}/forgot-password`,
+  logout: `${base_url}/logout`,
   currentUser: `${base_url}/api/user`,
   profile: `${base_url}/api/profile`,
   patients: {
